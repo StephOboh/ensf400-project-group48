@@ -75,7 +75,7 @@ pipeline {
     //     sleep 5
     //     sh './gradlew checkQualityGate'
     //   }
-    }
+    // }
 
 
     // Move the binary over to the test environment and
