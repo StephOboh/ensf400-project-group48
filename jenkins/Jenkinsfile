@@ -1,21 +1,4 @@
 // This jenkinsfile is used to run CI/CD on my local (Windows) box, no VM's needed.
-properties([
-    pipelineTriggers([
-        githubTriggers([
-            [
-                $class: 'GitHubPRTrigger',
-                events: [
-                    [$class: 'GitHubPRTriggerEvent', action: 'Opened'],
-                    [$class: 'GitHubPRTriggerEvent', action: 'Synchronize']
-                ],
-                branchRestriction: [
-                    $class: 'TargetBranchRestriction',
-                    include: 'Stephenie2,main' 
-                ]
-            ]
-        ])
-    ])
-])
 
 pipeline {
     agent {
@@ -30,6 +13,10 @@ pipeline {
         HTTP_PROXY = 'http://127.0.0.1:9888'
         GRADLE_OPTS = '-Dorg.gradle.daemon=false'
         SONAR_TOKEN = credentials('sonar-token')
+    }
+
+    triggers {
+        githubPush()
     }
 
   stages {
