@@ -226,26 +226,35 @@ pipeline {
 
   post {
     always {
-      archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
-      cleanWs()
-    }
-    
-    success {
-      updateGitHubCommitStatus(
-      name: "ENSF400-Pipeline", 
-      state: "success",
-      context: "jenkins/pr-validation"
-      )
-      echo 'Pipeline completed successfully'
-    }
+        // Archive test results and clean up
+        archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
+        cleanWs()
+        
+        // Update GitHub commit status (for PRs only)
+        script {
+            if (env.CHANGE_ID) {  // This ensures it only runs for PR builds
+                def statusName = "ENSF400-Pipeline"
+                def buildUrl = "${env.RUN_DISPLAY_URL}"
+                def commitSha = env.CHANGE_TARGET  // env.GIT_COMMIT
 
-    failure {
-      updateGitHubCommitStatus(
-      name: "ENSF400-Pipeline",
-      state: "failure",
-      context: "jenkins/pr-validation"
-      )
-      echo 'Pipeline failed'
+                // Determine status based on build result
+                def buildStatus = currentBuild.currentResult.toLowerCase()
+                if (buildStatus == 'unstable') {
+                    buildStatus = 'failure'  // GitHub only accepts error/failure/pending/success
+                }
+
+                // Update GitHub status
+                updateGitHubCommitStatus(
+                    name: statusName,
+                    state: buildStatus,
+                    context: "jenkins/${statusName}",
+                    description: "Build ${currentBuild.currentResult}",
+                    targetUrl: buildUrl
+                )
+                
+                echo "Updated GitHub status for ${commitSha}: ${buildStatus}"
+            }
+        }
     }
   }
 }
