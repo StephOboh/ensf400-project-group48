@@ -234,14 +234,27 @@ pipeline {
     // happens, since this is a demo project.
     stage('Deploy to Prod') {
       steps {
-        // just a token operation while we pretend to deploy
-        sh 'sleep 5'
+        sh 'echo "Production deployment would happen here"'
       }
     }
-
   }
 
+  post {
+    always {
+      archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
+      cleanWs()
+    }
+    success {
+      echo 'Pipeline completed successfully'
+    }
+    failure {
+      echo 'Pipeline failed'
+      // Remove slackSend if you haven't installed the Slack plugin
+      // slackSend color: 'danger', message: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+    }
+  }
 }
+
 
 
 
