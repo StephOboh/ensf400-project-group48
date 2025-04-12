@@ -9,7 +9,7 @@ properties([
                 ],
                 branchRestriction: [
                     $class: 'TargetBranchRestriction',
-                    include: 'Stephenie2', 'main' 
+                    include: 'Stephenie2,main' 
                 ]
             ]
         ])
