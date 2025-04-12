@@ -18,21 +18,19 @@ properties([
 ])
 
 pipeline {
-
     agent {
-      docker {
-        image 'gradle:7.6.4-jdk11'
-        args '-v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""'
-        reuseNode true
-      }
+        docker {
+            image 'gradle:7.6.4-jdk11'
+            args '-v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""'
+            reuseNode true
+        }
+    }
 
-   environment {
-        // This is set so that the Python API tests will recognize it
-        // and go through the Zap proxy waiting at 9888
+    environment {
         HTTP_PROXY = 'http://127.0.0.1:9888'
         GRADLE_OPTS = '-Dorg.gradle.daemon=false'
         SONAR_TOKEN = credentials('sonar-token')
-   }
+    }
 
   stages {
 
