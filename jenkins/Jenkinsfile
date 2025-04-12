@@ -229,13 +229,23 @@ pipeline {
       archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
       cleanWs()
     }
+    
     success {
+      updateGitHubCommitStatus(
+      name: "ENSF400-Pipeline", 
+      state: "success",
+      context: "jenkins/pr-validation"
+      )
       echo 'Pipeline completed successfully'
     }
+
     failure {
+      updateGitHubCommitStatus(
+      name: "ENSF400-Pipeline",
+      state: "failure",
+      context: "jenkins/pr-validation"
+      )
       echo 'Pipeline failed'
-      // Remove slackSend if you haven't installed the Slack plugin
-      // slackSend color: 'danger', message: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
     }
   }
 }
