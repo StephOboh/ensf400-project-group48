@@ -226,33 +226,38 @@ pipeline {
 
   post {
     always {
-        // Archive test results and clean up
+        // Archive and cleanup (keep your existing logic)
         archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
         cleanWs()
-        
-        // Update GitHub commit status (for PRs only)
+
+        // PR-Specific Status Reporting
         script {
-            if (env.CHANGE_ID) {  // This ensures it only runs for PR builds
-                def statusName = "ENSF400-Pipeline"
-                def buildUrl = "${env.RUN_DISPLAY_URL}"
-                def commitSha = env.CHANGE_TARGET  // env.GIT_COMMIT
+            if (env.CHIT_CHANGE_ID) { // Explicit PR check
+                def prNumber = env.CHANGE_ID
+                def repoUrl = "https://github.com/${env.CHANGE_FORK?.trim() ?: env.CHANGE_TARGET.trim()}"
+                def buildResult = currentBuild.currentResult.toLowerCase() == 'success' ? 'success' : 'failure'
 
-                // Determine status based on build result
-                def buildStatus = currentBuild.currentResult.toLowerCase()
-                if (buildStatus == 'unstable') {
-                    buildStatus = 'failure'  // GitHub only accepts error/failure/pending/success
-                }
-
-                // Update GitHub status
+                // Method 1: Native GitHub PR Status (recommended)
                 updateGitHubCommitStatus(
-                    name: statusName,
-                    state: buildStatus,
-                    context: "jenkins/${statusName}",
-                    description: "Build ${currentBuild.currentResult}",
-                    targetUrl: buildUrl
+                    name: "ENSF400-Pipeline",
+                    state: buildResult,
+                    context: "jenkins/pr-checks",
+                    description: "PR Build ${currentBuild.currentResult}",
+                    targetUrl: env.RUN_DISPLAY_URL
                 )
+
+                // Method 2: GitHub Checks API (more detailed)
+                if (buildResult == 'success') {
+                    githubNotify description: "All checks passed", 
+                                status: 'SUCCESS', 
+                                context: "Jenkins/PR-Validation"
+                } else {
+                    githubNotify description: "Build failed with ${currentBuild.currentResult}", 
+                                status: 'FAILURE', 
+                                context: "Jenkins/PR-Validation"
+                }
                 
-                echo "Updated GitHub status for ${commitSha}: ${buildStatus}"
+                echo "Reported PR #${prNumber} status to GitHub: ${buildResult}"
             }
         }
     }
