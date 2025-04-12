@@ -9,7 +9,7 @@ properties([
                 ],
                 branchRestriction: [
                     $class: 'TargetBranchRestriction',
-                    include: 'main' // Match your whitelist setting
+                    include: 'Stephenie2', 'main' 
                 ]
             ]
         ])
