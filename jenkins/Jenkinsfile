@@ -1,3 +1,21 @@
+properties([
+    pipelineTriggers([
+        githubTriggers([
+            [
+                $class: 'GitHubPRTrigger',
+                events: [
+                    [$class: 'GitHubPRTriggerEvent', action: 'Opened'],
+                    [$class: 'GitHubPRTriggerEvent', action: 'Synchronize']
+                ],
+                branchRestriction: [
+                    $class: 'TargetBranchRestriction',
+                    include: 'main' // Match your whitelist setting
+                ]
+            ]
+        ])
+    ])
+])
+
 pipeline {
   agent {
     docker {
