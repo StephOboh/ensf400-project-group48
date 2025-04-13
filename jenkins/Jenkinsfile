@@ -228,42 +228,34 @@ pipeline {
     // }
   }
 
-  post {
-    always {
-        // Basic archiving and cleanup
-        archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
-        cleanWs()
-        
-        // GitHub status reporting
-        script {
-            if (env.CHANGE_ID) {
-                try {
-                    // Method 1: Use the standard GitHub commit status updater
-                    updateGitHubCommitStatus(
-                        name: "Jenkins Build",
-                        state: currentBuild.currentResult.toLowerCase(),
-                        context: "jenkins/build",
+post {
+        always {
+            script {
+                if (env.CHANGE_ID) {
+                    // Method 1: Modern GitHub status update
+                    githubNotify(
                         description: "Build ${currentBuild.currentResult}",
-                        targetUrl: env.BUILD_URL
+                        status: currentBuild.currentResult,
+                        context: env.GITHUB_STATUS_CONTEXT
                     )
-                } catch (Exception e1) {
-                    echo "WARNING: Failed to update GitHub commit status: ${e1.message}"
                     
-                    // Fallback method if the above fails
-                    try {
-                        // This requires the GitHub Notification Plugin
-                        step([
-                            $class: 'GitHubCommitStatusSetter',
-                            statusSource: [$class: 'ManuallyEnteredStatusSource', result: currentBuild.currentResult],
-                            contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'jenkins-ci'],
-                            reposSource: [$class: 'ManuallyEnteredRepositorySource', url: env.GIT_URL]
-                        ])
-                    } catch (Exception e2) {
-                        echo "ERROR: All GitHub status update methods failed: ${e2.message}"
+                    // Method 2: Fallback API call
+                    withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
+                        sh """
+                            curl -X POST \
+                            -H "Authorization: token ${GITHUB_TOKEN}" \
+                            -H "Accept: application/vnd.github.v3+json" \
+                            "https://api.github.com/repos/StephOboh/ensf400-project-group48/statuses/${env.GIT_COMMIT}" \
+                            -d '{
+                                "state": "${currentBuild.currentResult.toLowerCase()}",
+                                "target_url": "${env.BUILD_URL}",
+                                "description": "Jenkins build ${currentBuild.currentResult}",
+                                "context": "${env.GITHUB_STATUS_CONTEXT}"
+                            }'
+                        """
                     }
                 }
             }
         }
     }
-}
 }
