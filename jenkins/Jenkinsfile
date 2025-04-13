@@ -229,15 +229,24 @@ pipeline {
   }
 
   post {
+
     success {
+      if (env.CHANGE_ID) {
         script {
-            setGitHubPullRequestStatus context: 'Jenkins CI/CD Pipeline Build', state: 'SUCCESS'
+          setGitHubPullRequestStatus context: 'ENSF400-Pipeline', state: 'SUCCESS'
         }
+      }
     }
+    
     failure {
+      if (env.CHANGE_ID) {
         script {
-            setGitHubPullRequestStatus context: 'Jenkins CI/CD Pipeline Build', state: 'FAILURE'
+          setGitHubPullRequestStatus context: 'ENSF400-Pipelin', state: 'FAILURE'
         }
+      }
     }
+
+    archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
+      cleanWs()
   }
 }
