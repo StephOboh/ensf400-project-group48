@@ -9,13 +9,13 @@ pipeline {
       }
   }
 
-  options([
-        pipelineTriggers([
-            [$class: 'GitHubPRBTrigger',
-             adminlist: 'StephOboh',
-             useGitHubHooks: true]
-        ])
+  options {
+      pipelineTriggers([
+      [$class: 'GitHubPRBTrigger',
+        adminlist: 'StephOboh',
+        useGitHubHooks: true]
     ])
+  }
 
   environment {
     HTTP_PROXY = 'http://127.0.0.1:9888'
