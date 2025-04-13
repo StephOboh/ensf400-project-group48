@@ -225,39 +225,41 @@ pipeline {
   }
 
   post {
-        always {
-            githubNotify status: currentBuild.currentResult
-            archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
-            cleanWs()
-
-            script {
-                // Only run for PRs
-                if (env.CHANGE_ID) {
-                    def buildResult = currentBuild.currentResult.toLowerCase()
-                    
-                    // Method 1: Update GitHub commit status (recommended)
+    always {
+        // Basic archiving and cleanup
+        archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
+        cleanWs()
+        
+        // GitHub status reporting
+        script {
+            if (env.CHANGE_ID) {
+                try {
+                    // Method 1: Use the standard GitHub commit status updater
                     updateGitHubCommitStatus(
-                        name: "Jenkins CI",
-                        state: buildResult,
-                        context: "jenkins/pr-checks",
+                        name: "Jenkins Build",
+                        state: currentBuild.currentResult.toLowerCase(),
+                        context: "jenkins/build",
                         description: "Build ${currentBuild.currentResult}",
                         targetUrl: env.BUILD_URL
                     )
-
-                    // Method 2: Alternative using githubNotify (if Method 1 doesn't work)
-                    try {
-                        githubNotify(
-                            description: "Build ${currentBuild.currentResult}",
-                            status: buildResult.toUpperCase(),
-                            context: "Jenkins/PR-Validation"
-                        )
-                    } catch (Exception e) {
-                        echo "Failed to send githubNotify: ${e.message}"
-                    }
+                } catch (Exception e1) {
+                    echo "WARNING: Failed to update GitHub commit status: ${e1.message}"
                     
-                    echo "Reported build status to GitHub PR #${env.CHANGE_ID}"
+                    // Fallback method if the above fails
+                    try {
+                        // This requires the GitHub Notification Plugin
+                        step([
+                            $class: 'GitHubCommitStatusSetter',
+                            statusSource: [$class: 'ManuallyEnteredStatusSource', result: currentBuild.currentResult],
+                            contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: 'jenkins-ci'],
+                            reposSource: [$class: 'ManuallyEnteredRepositorySource', url: env.GIT_URL]
+                        ])
+                    } catch (Exception e2) {
+                        echo "ERROR: All GitHub status update methods failed: ${e2.message}"
+                    }
                 }
             }
         }
-  }
+    }
+}
 }
