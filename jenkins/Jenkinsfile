@@ -19,14 +19,6 @@ pipeline {
     githubPush()
   }
 
-  options {
-    githubProperty {
-      // Explicitly set GitHub context
-      displayName('Jenkins CI')
-      statusContext('jenkins/pr-checks')
-    }
-  }
-
   stages {
 
     // Fix permissions and verify environment
@@ -233,25 +225,38 @@ pipeline {
   }
 
   post {
-    always {
-      archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
-      cleanWs()
-        
-      script {
-        // Only run for PRs
-        if (env.CHANGE_ID) {
-          def buildStatus = currentBuild.currentResult.toLowerCase()
-                
-            // Update GitHub commit status
-            updateGitHubCommitStatus(
-            name: "Jenkins CI",
-            state: buildStatus,
-            context: "jenkins/pr-checks",
-            description: "Build ${currentBuild.currentResult}",
-            targetUrl: env.BUILD_URL
-            )
+        always {
+            archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
+            cleanWs()
+
+            script {
+                // Only run for PRs
+                if (env.CHANGE_ID) {
+                    def buildResult = currentBuild.currentResult.toLowerCase()
+                    
+                    // Method 1: Update GitHub commit status (recommended)
+                    updateGitHubCommitStatus(
+                        name: "Jenkins CI",
+                        state: buildResult,
+                        context: "jenkins/pr-checks",
+                        description: "Build ${currentBuild.currentResult}",
+                        targetUrl: env.BUILD_URL
+                    )
+
+                    // Method 2: Alternative using githubNotify (if Method 1 doesn't work)
+                    try {
+                        githubNotify(
+                            description: "Build ${currentBuild.currentResult}",
+                            status: buildResult.toUpperCase(),
+                            context: "Jenkins/PR-Validation"
+                        )
+                    } catch (Exception e) {
+                        echo "Failed to send githubNotify: ${e.message}"
+                    }
+                    
+                    echo "Reported build status to GitHub PR #${env.CHANGE_ID}"
+                }
+            }
         }
-      }
-    }
   }
 }
