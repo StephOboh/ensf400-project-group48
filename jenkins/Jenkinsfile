@@ -230,19 +230,12 @@ pipeline {
 
   post {
     success {
-      script {
-        if (env.CHANGE_ID) {
-          setGitHubPullRequestStatus context: 'CI Pipeline', state: 'SUCCESS'
-        }
-        }
+      setGitHubPullRequestStatus context: 'CI Pipeline', state: 'SUCCESS'
+
     }
       
     failure {
-      script {
-        if (env.CHANGE_ID) {
-          setGitHubPullRequestStatus context: 'CI Pipeline', state: 'FAILURE'
-        }
-      } 
+        setGitHubPullRequestStatus context: 'CI Pipeline', state: 'FAILURE' 
     }
       
     always {
