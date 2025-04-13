@@ -9,12 +9,9 @@ pipeline {
       }
   }
 
-  options {
-      pipelineTriggers([
-      [$class: 'GitHubPRBTrigger',
-        adminlist: 'StephOboh',
-        useGitHubHooks: true]
-    ])
+  triggers {
+    githubPush()
+    pollSCM('H/5 * * * *')
   }
 
   environment {
