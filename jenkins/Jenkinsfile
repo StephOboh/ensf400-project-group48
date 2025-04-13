@@ -10,13 +10,16 @@ pipeline {
   }
 
   environment {
-      HTTP_PROXY = 'http://127.0.0.1:9888'
-      GRADLE_OPTS = '-Dorg.gradle.daemon=false'
-      SONAR_TOKEN = credentials('sonar-token')
+    HTTP_PROXY = 'http://127.0.0.1:9888'
+    GRADLE_OPTS = '-Dorg.gradle.daemon=false'
+    SONAR_TOKEN = credentials('sonar-token')
+
+    REPO_NAME = 'ensf400-project-group48'
+    OWNER_NAME = 'StephOboh'
   }
 
   triggers {
-    githubPush()
+    GitHubPushTrigger()
   }
 
   stages {
