@@ -14,6 +14,10 @@ pipeline {
     pollSCM('H/5 * * * *')
   }
 
+  options {
+    disableGitHubNotifications()
+  }
+
   environment {
     HTTP_PROXY = 'http://127.0.0.1:9888'
     GRADLE_OPTS = '-Dorg.gradle.daemon=false'
@@ -228,42 +232,23 @@ pipeline {
     // }
   }
 
-  // post {
-  //   success {
-  //     script {
-  //       if (env.CHANGE_ID) {
-  //         setGitHubPullRequestStatus context: 'CI Pipeline', state: 'SUCCESS'
-  //       }
-  //       }
-  //   }
-      
-  //   failure {
-  //     script {
-  //       if (env.CHANGE_ID) {
-  //         setGitHubPullRequestStatus context: 'CI Pipeline', state: 'FAILURE'
-  //       }
-  //     } 
-  //   }
-      
-  //   always {
-  //     archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
-  //     cleanWs()
-  //   }
-  // }
-
   post {
     success {
       script {
-        setGitHubPullRequestStatus context: 'CI/CD Pipeline Build', state: 'SUCCESS'
-      }
+        if (env.CHANGE_ID) {
+          setGitHubPullRequestStatus context: 'CI Pipeline', state: 'SUCCESS'
+        }
+        }
     }
-
+      
     failure {
       script {
-        setGitHubPullRequestStatus context: 'CI/CD Pipeline Build', state: 'FAILURE'
-      }
+        if (env.CHANGE_ID) {
+          setGitHubPullRequestStatus context: 'CI Pipeline', state: 'FAILURE'
+        }
+      } 
     }
-
+      
     always {
       archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
       cleanWs()
