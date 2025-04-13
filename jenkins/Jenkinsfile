@@ -229,24 +229,25 @@ pipeline {
   }
 
   post {
-
     success {
-      if (env.CHANGE_ID) {
-        script {
+      script {
+        if (env.CHANGE_ID) {
           setGitHubPullRequestStatus context: 'ENSF400-Pipeline', state: 'SUCCESS'
         }
-      }
+        }
     }
-    
+      
     failure {
-      if (env.CHANGE_ID) {
-        script {
+      script {
+        if (env.CHANGE_ID) {
           setGitHubPullRequestStatus context: 'ENSF400-Pipeline', state: 'FAILURE'
         }
-      }
+      } 
     }
-
-    archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
+      
+    always {
+      archiveArtifacts artifacts: 'build/libs/*.war', fingerprint: true
       cleanWs()
+    }
   }
 }
