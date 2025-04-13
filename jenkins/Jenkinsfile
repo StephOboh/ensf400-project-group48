@@ -19,8 +19,23 @@ pipeline {
   }
 
   triggers {
-    GitHubPushTrigger()
-  }
+    githubPullRequest {
+        // Required
+        useGitHubHooks()
+        admin('StephOboh')  // GitHub admin username
+        
+        // Status reporting
+        extensions {
+            commitStatus {
+                context('Jenkins CI')
+                triggeredStatus('Build started...')
+                startedStatus('Building...')
+                completedStatus('SUCCESS', 'All checks passed!')
+                completedStatus('FAILURE', 'Build failed!')
+            }
+        }
+    }
+}
 
   stages {
 
