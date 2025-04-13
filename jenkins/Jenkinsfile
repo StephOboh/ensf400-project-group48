@@ -9,7 +9,7 @@ pipeline {
       }
   }
 
-  properties([
+  options([
         pipelineTriggers([
             [$class: 'GitHubPRBTrigger',
              adminlist: 'StephOboh',
