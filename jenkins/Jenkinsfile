@@ -257,6 +257,7 @@ pipeline {
                     echo "Reported build status to GitHub PR #${env.CHANGE_ID}"
                 }
             }
+        githubNotify status: currentBuild.currentResult
         }
   }
 }
