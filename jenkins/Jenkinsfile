@@ -19,10 +19,7 @@ pipeline {
   }
 
   triggers {
-    githubPullRequest {
-        admin('StephOboh')     // Your GitHub username
-        useGitHubHooks()       // Required for webhook integration
-    }
+    GitHubPushTrigger()
   }
 
   stages {
