@@ -241,7 +241,7 @@ pipeline {
     failure {
       if (env.CHANGE_ID) {
         script {
-          setGitHubPullRequestStatus context: 'ENSF400-Pipelin', state: 'FAILURE'
+          setGitHubPullRequestStatus context: 'ENSF400-Pipeline', state: 'FAILURE'
         }
       }
     }
