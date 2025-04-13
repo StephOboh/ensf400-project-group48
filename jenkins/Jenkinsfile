@@ -14,10 +14,6 @@ pipeline {
     pollSCM('H/5 * * * *')
   }
 
-  options {
-    disableGitHubNotifications()
-  }
-
   environment {
     HTTP_PROXY = 'http://127.0.0.1:9888'
     GRADLE_OPTS = '-Dorg.gradle.daemon=false'
