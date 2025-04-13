@@ -232,7 +232,7 @@ pipeline {
     success {
       script {
         if (env.CHANGE_ID) {
-          setGitHubPullRequestStatus context: 'ENSF400-Pipeline', state: 'SUCCESS'
+          setGitHubPullRequestStatus context: 'CI Pipeline', state: 'SUCCESS'
         }
         }
     }
@@ -240,7 +240,7 @@ pipeline {
     failure {
       script {
         if (env.CHANGE_ID) {
-          setGitHubPullRequestStatus context: 'ENSF400-Pipeline', state: 'FAILURE'
+          setGitHubPullRequestStatus context: 'CI Pipeline', state: 'FAILURE'
         }
       } 
     }
