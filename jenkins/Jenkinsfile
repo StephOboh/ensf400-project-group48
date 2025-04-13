@@ -231,13 +231,13 @@ pipeline {
 post {
         always {
             script {
-                // if (env.CHANGE_ID) {
-                //     // Method 1: Modern GitHub status update
-                //     githubNotify(
-                //         description: "Build ${currentBuild.currentResult}",
-                //         status: currentBuild.currentResult,
-                //         context: env.GITHUB_STATUS_CONTEXT
-                //     )
+                if (env.CHANGE_ID) {
+                    // // Method 1: Modern GitHub status update
+                    // githubNotify(
+                    //     description: "Build ${currentBuild.currentResult}",
+                    //     status: currentBuild.currentResult,
+                    //     context: env.GITHUB_STATUS_CONTEXT
+                    // )
                     
                     // Method 2: Fallback API call
                     withCredentials([string(credentialsId: 'github-pat', variable: 'GITHUB_TOKEN')]) {
